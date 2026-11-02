@@ -104,7 +104,7 @@
       position: relative;
       width: 100%;
       height: 88vh;
-      min-height: 640px;
+      min-height: 660px;
       margin-top: 60px;
       background: radial-gradient(circle at 50% 45%, #1a2234 0%, #090b10 75%);
       border-bottom: 1px solid var(--border);
@@ -137,20 +137,20 @@
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 1.25rem;
+      padding: 1.2rem;
       pointer-events: auto;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     }
 
     .hud-card h1 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 800;
       line-height: 1.2;
     }
 
     .hud-card .role {
       color: var(--accent);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -158,9 +158,9 @@
     }
 
     .hud-card p {
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       color: var(--text-muted);
-      margin-top: 0.6rem;
+      margin-top: 0.55rem;
     }
 
     .panel-label {
@@ -178,14 +178,14 @@
     .model-list {
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      gap: 0.4rem;
     }
 
     .model-btn {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border);
       color: var(--text-main);
-      padding: 0.65rem 0.85rem;
+      padding: 0.6rem 0.85rem;
       border-radius: 8px;
       text-align: left;
       cursor: pointer;
@@ -193,12 +193,12 @@
       justify-content: space-between;
       align-items: center;
       transition: all 0.18s;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 600;
     }
 
     .model-btn small {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       font-weight: 400;
       background: rgba(255,255,255,0.06);
@@ -218,15 +218,16 @@
     }
 
     .dropzone-hint {
-      margin-top: 0.75rem;
-      padding: 0.6rem;
+      margin-top: 0.7rem;
+      padding: 0.55rem;
       border: 1px dashed rgba(56, 189, 248, 0.4);
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       text-align: center;
       color: var(--text-muted);
       cursor: pointer;
       transition: background 0.2s;
+      display: block;
     }
 
     .dropzone-hint:hover {
@@ -548,7 +549,7 @@
 
       <div class="hud-card">
         <div class="panel-label">
-          <span>Modelos en Escena</span>
+          <span>Modelos en Escena (6)</span>
           <span style="color: var(--accent);">GLTF 2.0</span>
         </div>
         <div class="model-list" id="model-list"></div>
@@ -662,30 +663,33 @@
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
     /**
-     * CONFIGURACIÓN DE TUS 5 MODELOS
-     * Sube tus archivos .glb a la raíz de tu repositorio con estos nombres
-     * (o cambia el campo "file" por el nombre exacto con el que los subas).
+     * TUS 6 MODELOS SINCRONIZADOS CON LOS NOMBRES EXACTOS DE TU CAPTURA
      */
     const PORTFOLIO_MODELS = [
       {
         name: "Wanderer & Bird",
-        file: "wanderer.glb",
-        tag: "Rig + 5 Anims"
+        file: "Wanderer.glb",
+        tag: "Rig + 7 Anims"
       },
       {
         name: "Yami Witch",
-        file: "yami.glb",
+        file: "Yamiwitch.glb",
         tag: "52 ARKit Keys"
       },
       {
-        name: "Stylized Fighter",
-        file: "character2.glb",
+        name: "Rumi Lite",
+        file: "rumi_lite.glb",
         tag: "93 Bones + Keys"
       },
       {
-        name: "Combat Character",
-        file: "mixamo_char.glb",
+        name: "Buchito",
+        file: "Buchito.glb",
         tag: "Full Anim"
+      },
+      {
+        name: "Calicho",
+        file: "Calicho.glb",
+        tag: "3D Character"
       },
       {
         name: "Baki Stylized Cat",
@@ -698,7 +702,6 @@
     const loaderOverlay = document.getElementById('loader-overlay');
     const loaderText = document.getElementById('loader-text');
 
-    // Escena, Cámara y Renderer con estética de estudio
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.05, 100);
@@ -722,7 +725,7 @@
     controls.minDistance = 0.6;
     controls.maxDistance = 12;
 
-    // Iluminación de 3 puntos profesional (Key, Fill, Rim cyan/violeta)
+    // Iluminación de estudio de 3 puntos
     const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 1.2);
     scene.add(hemiLight);
 
@@ -741,7 +744,7 @@
     rimLight2.position.set(3, 2, -4);
     scene.add(rimLight2);
 
-    // Piso receptor de sombras y grilla técnica
+    // Piso receptor de sombras y grilla
     const groundGeo = new THREE.PlaneGeometry(20, 20);
     const groundMat = new THREE.ShadowMaterial({ opacity: 0.38 });
     const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -757,7 +760,6 @@
     scene.add(gridHelper);
     document.getElementById('btn-grid').classList.add('active');
 
-    // Estado de la escena
     let currentModel = null;
     let skeletonHelper = null;
     let mixer = null;
@@ -766,7 +768,6 @@
     const clock = new THREE.Clock();
     const gltfLoader = new GLTFLoader();
 
-    // Limpiar modelo anterior
     function clearCurrentModel() {
       if (currentModel) {
         scene.remove(currentModel);
@@ -785,13 +786,15 @@
       }
     }
 
-    // Procesar e inspeccionar cualquier GLTF cargado
     function setupGLTF(gltf, labelName = "Modelo") {
       clearCurrentModel();
       const model = gltf.scene;
       currentModel = model;
 
-      // Auto-centrado y normalización de escala (soporta modelos en metros o cm como Mixamo)
+      // Asegurar que las matrices de los huesos estén actualizadas antes de medir la caja
+      model.updateMatrixWorld(true);
+
+      // Auto-centrado y normalización de escala
       const box = new THREE.Box3().setFromObject(model);
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
@@ -799,7 +802,7 @@
       const scale = targetHeight / maxDim;
       model.scale.multiplyScalar(scale);
 
-      // Recalcular caja después de escalar para apoyar los pies exactamente en Y = 0
+      model.updateMatrixWorld(true);
       const scaledBox = new THREE.Box3().setFromObject(model);
       const center = scaledBox.getCenter(new THREE.Vector3());
       model.position.x -= center.x;
@@ -880,7 +883,7 @@
         animListEl.appendChild(emptyMsg);
       }
 
-      // Configurar Blendshapes / Morph Targets (agrupando por nombre para mallas múltiples)
+      // Configurar Blendshapes / Morph Targets
       const morphListEl = document.getElementById('morph-list');
       morphListEl.innerHTML = '';
       const groupedMorphs = {};
@@ -922,14 +925,12 @@
         morphListEl.appendChild(emptyMorph);
       }
 
-      // Enfocar cámara suavemente
       controls.target.set(0, targetHeight * 0.48, 0);
       controls.update();
       loaderOverlay.style.opacity = '0';
       setTimeout(() => { loaderOverlay.style.display = 'none'; }, 300);
     }
 
-    // Malla procedural de respaldo por si aún no se han subido los archivos .glb al repo
     function loadFallbackShowcase(modelName) {
       clearCurrentModel();
       const group = new THREE.Group();
@@ -945,21 +946,14 @@
       mesh.castShadow = true;
       group.add(mesh);
 
-      const ringGeo = new THREE.TorusGeometry(1.1, 0.02, 16, 100);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0x818cf8 });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.y = 1.0;
-      ring.rotation.x = Math.PI / 3;
-      group.add(ring);
-
       currentModel = group;
       scene.add(group);
 
       document.getElementById('stat-tris').textContent = "320";
       document.getElementById('stat-verts').textContent = "162";
       document.getElementById('stat-bones').textContent = "0";
-      document.getElementById('anim-list').innerHTML = `<span style="font-size:0.75rem;color:var(--accent);">Sube <b>${modelName}</b> a tu repo o arrástralo desde tu PC a la pantalla.</span>`;
-      document.getElementById('morph-list').innerHTML = `<span style="font-size:0.75rem;color:var(--text-muted);">Listo para inspeccionar tus .GLB</span>`;
+      document.getElementById('anim-list').innerHTML = `<span style="font-size:0.75rem;color:var(--accent);">No se encontró <b>${modelName}</b> en la raíz del repositorio.</span>`;
+      document.getElementById('morph-list').innerHTML = `<span style="font-size:0.75rem;color:var(--text-muted);">Verifica que el archivo esté en la carpeta raíz.</span>`;
 
       controls.target.set(0, 1.0, 0);
       controls.update();
@@ -967,7 +961,6 @@
       setTimeout(() => { loaderOverlay.style.display = 'none'; }, 300);
     }
 
-    // Cargar archivo GLB desde URL
     function loadModelByUrl(url, title) {
       loaderOverlay.style.display = 'flex';
       loaderOverlay.style.opacity = '1';
@@ -988,7 +981,6 @@
       );
     }
 
-    // Poblar lista de botones de modelos
     const modelListEl = document.getElementById('model-list');
     PORTFOLIO_MODELS.forEach((item, index) => {
       const btn = document.createElement('button');
@@ -1002,7 +994,6 @@
       modelListEl.appendChild(btn);
     });
 
-    // Soporte Drag & Drop o Selector de Archivo Local para probar tus .GLB al instante
     function handleLocalFile(file) {
       if (!file) return;
       const url = URL.createObjectURL(file);
@@ -1022,7 +1013,6 @@
       }
     });
 
-    // Controles de visualización técnica
     document.getElementById('btn-wireframe').onclick = function() {
       isWireframe = !isWireframe;
       this.classList.toggle('active', isWireframe);
@@ -1051,14 +1041,12 @@
       this.classList.toggle('active', gridHelper.visible);
     };
 
-    // Resize responsivo
     window.addEventListener('resize', () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
     });
 
-    // Loop de renderizado
     function animate() {
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
@@ -1067,7 +1055,6 @@
       renderer.render(scene, camera);
     }
 
-    // Iniciar cargando el primer modelo
     loadModelByUrl(PORTFOLIO_MODELS[0].file, PORTFOLIO_MODELS[0].name);
     animate();
   </script>
