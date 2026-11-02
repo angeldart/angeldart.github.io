@@ -3,91 +3,1073 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio | 3D & Technical Art</title>
+  <title>Angel Gomez (Angeldart) | 3D Character & Technical Artist</title>
   <style>
     :root {
-      --bg: #0f1115;
-      --card-bg: #161a22;
+      --bg-dark: #090b10;
+      --panel-bg: rgba(18, 22, 31, 0.85);
+      --card-bg: #131722;
       --accent: #38bdf8;
-      --text: #e2e8f0;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-secondary: #818cf8;
+      --text-main: #f1f5f9;
       --text-muted: #94a3b8;
-      --border: #262c36;
+      --border: rgba(255, 255, 255, 0.08);
+      --success: #34d399;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
       line-height: 1.6;
-      padding: 2rem 1rem;
+      overflow-x: hidden;
     }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    header {
-      padding: 3rem 0 2rem;
+
+    /* BARRA DE NAVEGACIÓN */
+    nav {
+      position: fixed;
+      top: 0; width: 100%;
+      z-index: 100;
+      background: rgba(9, 11, 16, 0.8);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
+      padding: 0.9rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    h1 { font-size: 2.25rem; font-weight: 700; color: #fff; }
-    .subtitle { color: var(--accent); font-size: 1.1rem; margin-top: 0.25rem; }
-    .bio { margin-top: 1rem; color: var(--text-muted); max-width: 600px; }
-    .social-links { margin-top: 1.5rem; display: flex; gap: 1rem; }
-    .social-links a {
-      color: var(--text);
-      text-decoration: none;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand span {
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.9rem;
+      background: var(--accent-glow);
+      padding: 0.2rem 0.6rem;
+      border-radius: 99px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn {
       background: var(--card-bg);
+      color: var(--text-main);
       border: 1px solid var(--border);
       padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      transition: border-color 0.2s;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
-    .social-links a:hover { border-color: var(--accent); }
-    .section-title { margin: 2.5rem 0 1.25rem; font-size: 1.4rem; color: #fff; }
-    .grid {
+
+    .btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      color: #090b10;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* ESTACIÓN 3D PRINCIPAL (HERO VIEWPORT) */
+    .showcase-wrapper {
+      position: relative;
+      width: 100%;
+      height: 88vh;
+      min-height: 640px;
+      margin-top: 60px;
+      background: radial-gradient(circle at 50% 45%, #1a2234 0%, #090b10 75%);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #canvas-container:active { cursor: grabbing; }
+
+    /* OVERLAY IZQUIERDO: INFO ARTISTA Y SELECTOR DE MODELOS */
+    .hud-left {
+      position: absolute;
+      top: 1.5rem;
+      left: 2rem;
+      z-index: 10;
+      width: 330px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    .hud-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      pointer-events: auto;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .hud-card h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .hud-card .role {
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 0.25rem;
+    }
+
+    .hud-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.6rem;
+    }
+
+    .panel-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .model-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .model-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.18s;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .model-btn small {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      background: rgba(255,255,255,0.06);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    .model-btn:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .model-btn.active {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .dropzone-hint {
+      margin-top: 0.75rem;
+      padding: 0.6rem;
+      border: 1px dashed rgba(56, 189, 248, 0.4);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .dropzone-hint:hover {
+      background: rgba(56, 189, 248, 0.08);
+      color: var(--text-main);
+    }
+
+    /* OVERLAY DERECHO: INSPECTOR TÉCNICO */
+    .hud-right {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      z-index: 10;
+      width: 310px;
+      max-height: calc(100% - 3rem);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    .hud-right::-webkit-scrollbar { width: 5px; }
+    .hud-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-lbl {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    .toggle-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent-glow);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .anim-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .anim-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .anim-chip.active {
+      background: var(--success);
+      color: #090b10;
+      border-color: var(--success);
+      font-weight: 700;
+    }
+
+    .morph-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 170px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .morph-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      font-size: 0.75rem;
+    }
+
+    .morph-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 4px;
+    }
+
+    /* INDICADOR DE CARGA */
+    #loader-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 11, 16, 0.75);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+      transition: opacity 0.3s;
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 0.75rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .controls-hint {
+      position: absolute;
+      bottom: 1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 19, 28, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      padding: 0.4rem 1rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* SECCIÓN DE ESPECIFICACIONES Y SERVICIOS */
+    .section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 4.5rem 2rem;
+    }
+
+    .section-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.85rem;
+      font-weight: 800;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .services-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 1.5rem;
     }
-    .card {
+
+    .service-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
+      border-radius: 12px;
+      padding: 1.6rem;
+      transition: border-color 0.2s, transform 0.2s;
     }
-    .card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem; }
-    .card p { font-size: 0.9rem; color: var(--text-muted); }
+
+    .service-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .service-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .service-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .service-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 2rem;
+    }
+
+    .tech-badge {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      .hud-left, .hud-right {
+        position: static;
+        width: 100%;
+        max-height: none;
+      }
+      .showcase-wrapper {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+      }
+      #canvas-container {
+        height: 460px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+      .controls-hint { display: none; }
+    }
   </style>
+
+  <!-- Import Map oficial de Three.js r170 -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Tu Nombre / Alias</h1>
-      <p class="subtitle">3D Generalist & Technical Artist</p>
-      <p class="bio">Especializado en modelado, rigging y optimización técnica para motores de videojuegos.</p>
-      <div class="social-links">
-        <a href="https://artstation.com" target="_blank">ArtStation</a>
-        <a href="https://twitter.com" target="_blank">Twitter / X</a>
-        <a href="mailto:tu-correo@example.com">Contacto</a>
-      </div>
-    </header>
 
-    <h2 class="section-title">Especialidades</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Character & Hard-Surface</h3>
-        <p>Modelado con topología limpia orientada a rendimiento y deformación correcta.</p>
+  <nav>
+    <div class="brand">
+      ANGELDART <span>3D Tech & Character Art</span>
+    </div>
+    <div class="nav-links">
+      <a href="#services" class="btn">Pipeline & Servicios</a>
+      <a href="https://www.fiverr.com/angeldart" target="_blank" class="btn">Fiverr</a>
+      <a href="mailto:angeldart@gmail.com" class="btn btn-primary">Solicitar Comisión</a>
+    </div>
+  </nav>
+
+  <!-- ESTACIÓN DE INSPECCIÓN 3D -->
+  <section class="showcase-wrapper">
+    <div id="loader-overlay">
+      <div class="spinner"></div>
+      <div id="loader-text" style="font-size: 0.9rem; font-weight: 600;">Inicializando Escena 3D...</div>
+    </div>
+
+    <!-- Panel Izquierdo: Selector de Modelos -->
+    <div class="hud-left">
+      <div class="hud-card">
+        <h1>Angel Gomez</h1>
+        <div class="role">3D Character & Technical Artist</div>
+        <p>Personajes estilizados listos para producción, rigging avanzado, blendshapes ARKit y animaciones optimizadas para Unreal Engine y Unity.</p>
       </div>
-      <div class="card">
-        <h3>Rigging & Skinning</h3>
-        <p>Estructuras de huesos y pesos listos para integración directa en engine.</p>
-      </div>
-      <div class="card">
-        <h3>Optimización Técnica</h3>
-        <p>Mapeo UV eficiente, draw calls controladas y preparación de assets para tiempo real.</p>
+
+      <div class="hud-card">
+        <div class="panel-label">
+          <span>Modelos en Escena</span>
+          <span style="color: var(--accent);">GLTF 2.0</span>
+        </div>
+        <div class="model-list" id="model-list"></div>
+
+        <label class="dropzone-hint" for="file-input">
+          📂 Arrastra cualquier <b>.GLB</b> aquí o haz clic para inspeccionar
+          <input type="file" id="file-input" accept=".glb,.gltf" style="display:none;">
+        </label>
       </div>
     </div>
-  </div>
+
+    <!-- Canvas Three.js -->
+    <div id="canvas-container"></div>
+
+    <div class="controls-hint">
+      🖱️ Clic Izquierdo: Rotar &nbsp;|&nbsp; Clic Derecho: Paneo &nbsp;|&nbsp; Rueda: Zoom
+    </div>
+
+    <!-- Panel Derecho: Auditoría Técnica, Animaciones y Blendshapes -->
+    <div class="hud-right">
+      <div class="hud-card">
+        <div class="panel-label">Auditoría de Malla</div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="stat-tris">0</div>
+            <div class="stat-lbl">Tris</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="stat-verts">0</div>
+            <div class="stat-lbl">Vértices</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="stat-bones">0</div>
+            <div class="stat-lbl">Huesos</div>
+          </div>
+        </div>
+
+        <div class="panel-label" style="margin-top: 0.75rem;">Modo de Visualización</div>
+        <div class="toggle-grid">
+          <button class="toggle-btn" id="btn-wireframe">Wireframe</button>
+          <button class="toggle-btn" id="btn-skeleton">Ver Rig / Huesos</button>
+          <button class="toggle-btn active" id="btn-autorotate">Auto-Rotación</button>
+          <button class="toggle-btn" id="btn-grid">Piso / Grilla</button>
+        </div>
+      </div>
+
+      <div class="hud-card" id="anim-panel">
+        <div class="panel-label">
+          <span>Clips de Animación</span>
+          <span id="anim-count" style="color: var(--success);">0</span>
+        </div>
+        <div class="anim-list" id="anim-list"></div>
+      </div>
+
+      <div class="hud-card" id="morph-panel">
+        <div class="panel-label">
+          <span>Blendshapes / Shape Keys</span>
+          <span id="morph-count" style="color: var(--accent);">0</span>
+        </div>
+        <div class="morph-list" id="morph-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN DE SERVICIOS PARA DEVS INDIE -->
+  <section class="section" id="services">
+    <div class="section-header">
+      <h2>Arte 3D listo para integrar en tu Engine</h2>
+      <p>Sin geometría rota, sin problemas de escala y con jerarquías de huesos limpias.</p>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <span class="service-tag">Game-Ready Assets</span>
+        <h3>Modelado y Esculpido de Personajes</h3>
+        <p>Topología limpia orientada a deformación articular, UVs optimizados para maximizar densidad de texeles y baking PBR sin artefactos.</p>
+      </div>
+
+      <div class="service-card">
+        <span class="service-tag">Technical Art</span>
+        <h3>Rigging, Skinning & Blendshapes</h3>
+        <p>Rigs personalizados, compatibilidad con Mixamo/UE5 Mannequin, controles IK/FK y 52 expresiones faciales ARKit para VTubing o cinemáticas.</p>
+      </div>
+
+      <div class="service-card">
+        <span class="service-tag">Gameplay</span>
+        <h3>Animación 3D para Videojuegos</h3>
+        <p>Ciclos de locomoción, ataques con peso y timing, estados idle expresivos y exportación limpia en FBX/GLTF lista para State Machines.</p>
+      </div>
+    </div>
+
+    <div class="tech-stack">
+      <span class="tech-badge">Blender 4.2 / 5.1 LTS</span>
+      <span class="tech-badge">ZBrush</span>
+      <span class="tech-badge">Substance Painter</span>
+      <span class="tech-badge">Unreal Engine 5</span>
+      <span class="tech-badge">Unity</span>
+      <span class="tech-badge">Marmoset Toolbag</span>
+      <span class="tech-badge">VRM / ARKit Mocap</span>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Angel Gomez (Angeldart). Visor 3D en tiempo real potenciado por Three.js y WebGL.</p>
+  </footer>
+
+  <!-- LÓGICA THREE.JS -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    /**
+     * CONFIGURACIÓN DE TUS 5 MODELOS
+     * Sube tus archivos .glb a la raíz de tu repositorio con estos nombres
+     * (o cambia el campo "file" por el nombre exacto con el que los subas).
+     */
+    const PORTFOLIO_MODELS = [
+      {
+        name: "Wanderer & Bird",
+        file: "wanderer.glb",
+        tag: "Rig + 5 Anims"
+      },
+      {
+        name: "Yami Witch",
+        file: "yami.glb",
+        tag: "52 ARKit Keys"
+      },
+      {
+        name: "Stylized Fighter",
+        file: "character2.glb",
+        tag: "93 Bones + Keys"
+      },
+      {
+        name: "Combat Character",
+        file: "mixamo_char.glb",
+        tag: "Full Anim"
+      },
+      {
+        name: "Baki Stylized Cat",
+        file: "baki.glb",
+        tag: "Jumping Anim"
+      }
+    ];
+
+    const container = document.getElementById('canvas-container');
+    const loaderOverlay = document.getElementById('loader-overlay');
+    const loaderText = document.getElementById('loader-text');
+
+    // Escena, Cámara y Renderer con estética de estudio
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.05, 100);
+    camera.position.set(0, 1.4, 3.4);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.2;
+    controls.maxPolarAngle = Math.PI / 2 + 0.08;
+    controls.minDistance = 0.6;
+    controls.maxDistance = 12;
+
+    // Iluminación de 3 puntos profesional (Key, Fill, Rim cyan/violeta)
+    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x0f172a, 1.2);
+    scene.add(hemiLight);
+
+    const keyLight = new THREE.DirectionalLight(0xfffbeb, 2.4);
+    keyLight.position.set(3, 5, 4);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
+
+    const rimLight1 = new THREE.DirectionalLight(0x38bdf8, 1.8);
+    rimLight1.position.set(-4, 3, -3);
+    scene.add(rimLight1);
+
+    const rimLight2 = new THREE.DirectionalLight(0x818cf8, 1.2);
+    rimLight2.position.set(3, 2, -4);
+    scene.add(rimLight2);
+
+    // Piso receptor de sombras y grilla técnica
+    const groundGeo = new THREE.PlaneGeometry(20, 20);
+    const groundMat = new THREE.ShadowMaterial({ opacity: 0.38 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const gridHelper = new THREE.GridHelper(10, 20, 0x38bdf8, 0x1e293b);
+    gridHelper.position.y = 0.001;
+    gridHelper.material.opacity = 0.35;
+    gridHelper.material.transparent = true;
+    gridHelper.visible = true;
+    scene.add(gridHelper);
+    document.getElementById('btn-grid').classList.add('active');
+
+    // Estado de la escena
+    let currentModel = null;
+    let skeletonHelper = null;
+    let mixer = null;
+    let activeAction = null;
+    let isWireframe = false;
+    const clock = new THREE.Clock();
+    const gltfLoader = new GLTFLoader();
+
+    // Limpiar modelo anterior
+    function clearCurrentModel() {
+      if (currentModel) {
+        scene.remove(currentModel);
+        currentModel.traverse(obj => {
+          if (obj.geometry) obj.geometry.dispose();
+        });
+        currentModel = null;
+      }
+      if (skeletonHelper) {
+        scene.remove(skeletonHelper);
+        skeletonHelper = null;
+      }
+      if (mixer) {
+        mixer.stopAllAction();
+        mixer = null;
+      }
+    }
+
+    // Procesar e inspeccionar cualquier GLTF cargado
+    function setupGLTF(gltf, labelName = "Modelo") {
+      clearCurrentModel();
+      const model = gltf.scene;
+      currentModel = model;
+
+      // Auto-centrado y normalización de escala (soporta modelos en metros o cm como Mixamo)
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const targetHeight = 1.9;
+      const scale = targetHeight / maxDim;
+      model.scale.multiplyScalar(scale);
+
+      // Recalcular caja después de escalar para apoyar los pies exactamente en Y = 0
+      const scaledBox = new THREE.Box3().setFromObject(model);
+      const center = scaledBox.getCenter(new THREE.Vector3());
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+      model.position.y -= scaledBox.min.y;
+
+      let totalTris = 0;
+      let totalVerts = 0;
+      const boneSet = new Set();
+      const morphTargets = [];
+
+      model.traverse(child => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(m => { m.wireframe = isWireframe; });
+          }
+          const geom = child.geometry;
+          if (geom) {
+            totalVerts += geom.attributes.position ? geom.attributes.position.count : 0;
+            totalTris += geom.index ? (geom.index.count / 3) : (geom.attributes.position.count / 3);
+          }
+          if (child.isSkinnedMesh && child.skeleton) {
+            child.skeleton.bones.forEach(b => boneSet.add(b));
+          }
+          if (child.morphTargetDictionary && child.morphTargetInfluences) {
+            Object.entries(child.morphTargetDictionary).forEach(([keyName, idx]) => {
+              morphTargets.push({ mesh: child, name: keyName, index: idx });
+            });
+          }
+        }
+      });
+
+      scene.add(model);
+
+      // Skeleton Helper
+      skeletonHelper = new THREE.SkeletonHelper(model);
+      skeletonHelper.visible = document.getElementById('btn-skeleton').classList.contains('active');
+      scene.add(skeletonHelper);
+
+      // Actualizar métricas en HUD
+      document.getElementById('stat-tris').textContent = Math.round(totalTris).toLocaleString();
+      document.getElementById('stat-verts').textContent = totalVerts.toLocaleString();
+      document.getElementById('stat-bones').textContent = boneSet.size;
+
+      // Configurar Animaciones
+      const animListEl = document.getElementById('anim-list');
+      animListEl.innerHTML = '';
+      document.getElementById('anim-count').textContent = gltf.animations.length;
+
+      if (gltf.animations && gltf.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(model);
+        gltf.animations.forEach((clip, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'anim-chip' + (idx === 0 ? ' active' : '');
+          btn.textContent = clip.name || `Clip ${idx + 1}`;
+          btn.onclick = () => {
+            document.querySelectorAll('.anim-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const nextAction = mixer.clipAction(clip);
+            if (activeAction && activeAction !== nextAction) {
+              activeAction.fadeOut(0.2);
+            }
+            nextAction.reset().fadeIn(0.2).play();
+            activeAction = nextAction;
+          };
+          animListEl.appendChild(btn);
+        });
+        activeAction = mixer.clipAction(gltf.animations[0]);
+        activeAction.play();
+      } else {
+        const emptyMsg = document.createElement('span');
+        emptyMsg.style.fontSize = '0.75rem';
+        emptyMsg.style.color = 'var(--text-muted)';
+        emptyMsg.textContent = 'Pose estática (sin clips embebidos)';
+        animListEl.appendChild(emptyMsg);
+      }
+
+      // Configurar Blendshapes / Morph Targets (agrupando por nombre para mallas múltiples)
+      const morphListEl = document.getElementById('morph-list');
+      morphListEl.innerHTML = '';
+      const groupedMorphs = {};
+      morphTargets.forEach(item => {
+        if (!groupedMorphs[item.name]) groupedMorphs[item.name] = [];
+        groupedMorphs[item.name].push(item);
+      });
+
+      const morphNames = Object.keys(groupedMorphs);
+      document.getElementById('morph-count').textContent = morphNames.length;
+
+      if (morphNames.length > 0) {
+        morphNames.forEach(name => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'morph-item';
+          wrapper.innerHTML = `
+            <div class="morph-header">
+              <span>${name}</span>
+              <span class="val">0%</span>
+            </div>
+            <input type="range" min="0" max="1" step="0.01" value="0">
+          `;
+          const slider = wrapper.querySelector('input');
+          const valLbl = wrapper.querySelector('.val');
+          slider.addEventListener('input', e => {
+            const v = parseFloat(e.target.value);
+            valLbl.textContent = Math.round(v * 100) + '%';
+            groupedMorphs[name].forEach(t => {
+              t.mesh.morphTargetInfluences[t.index] = v;
+            });
+          });
+          morphListEl.appendChild(wrapper);
+        });
+      } else {
+        const emptyMorph = document.createElement('span');
+        emptyMorph.style.fontSize = '0.75rem';
+        emptyMorph.style.color = 'var(--text-muted)';
+        emptyMorph.textContent = 'Sin shape keys en este asset';
+        morphListEl.appendChild(emptyMorph);
+      }
+
+      // Enfocar cámara suavemente
+      controls.target.set(0, targetHeight * 0.48, 0);
+      controls.update();
+      loaderOverlay.style.opacity = '0';
+      setTimeout(() => { loaderOverlay.style.display = 'none'; }, 300);
+    }
+
+    // Malla procedural de respaldo por si aún no se han subido los archivos .glb al repo
+    function loadFallbackShowcase(modelName) {
+      clearCurrentModel();
+      const group = new THREE.Group();
+      const geo = new THREE.IcosahedronGeometry(0.75, 2);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        roughness: 0.25,
+        metalness: 0.7,
+        wireframe: isWireframe
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.y = 1.0;
+      mesh.castShadow = true;
+      group.add(mesh);
+
+      const ringGeo = new THREE.TorusGeometry(1.1, 0.02, 16, 100);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x818cf8 });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.y = 1.0;
+      ring.rotation.x = Math.PI / 3;
+      group.add(ring);
+
+      currentModel = group;
+      scene.add(group);
+
+      document.getElementById('stat-tris').textContent = "320";
+      document.getElementById('stat-verts').textContent = "162";
+      document.getElementById('stat-bones').textContent = "0";
+      document.getElementById('anim-list').innerHTML = `<span style="font-size:0.75rem;color:var(--accent);">Sube <b>${modelName}</b> a tu repo o arrástralo desde tu PC a la pantalla.</span>`;
+      document.getElementById('morph-list').innerHTML = `<span style="font-size:0.75rem;color:var(--text-muted);">Listo para inspeccionar tus .GLB</span>`;
+
+      controls.target.set(0, 1.0, 0);
+      controls.update();
+      loaderOverlay.style.opacity = '0';
+      setTimeout(() => { loaderOverlay.style.display = 'none'; }, 300);
+    }
+
+    // Cargar archivo GLB desde URL
+    function loadModelByUrl(url, title) {
+      loaderOverlay.style.display = 'flex';
+      loaderOverlay.style.opacity = '1';
+      loaderText.textContent = `Cargando ${title}...`;
+
+      gltfLoader.load(
+        url,
+        gltf => setupGLTF(gltf, title),
+        xhr => {
+          if (xhr.total) {
+            const pct = Math.round((xhr.loaded / xhr.total) * 100);
+            loaderText.textContent = `Cargando ${title} (${pct}%)...`;
+          }
+        },
+        () => {
+          loadFallbackShowcase(url);
+        }
+      );
+    }
+
+    // Poblar lista de botones de modelos
+    const modelListEl = document.getElementById('model-list');
+    PORTFOLIO_MODELS.forEach((item, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'model-btn' + (index === 0 ? ' active' : '');
+      btn.innerHTML = `<span>${item.name}</span><small>${item.tag}</small>`;
+      btn.onclick = () => {
+        document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadModelByUrl(item.file, item.name);
+      };
+      modelListEl.appendChild(btn);
+    });
+
+    // Soporte Drag & Drop o Selector de Archivo Local para probar tus .GLB al instante
+    function handleLocalFile(file) {
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+      loadModelByUrl(url, file.name);
+    }
+
+    document.getElementById('file-input').addEventListener('change', e => {
+      handleLocalFile(e.target.files[0]);
+    });
+
+    window.addEventListener('dragover', e => e.preventDefault());
+    window.addEventListener('drop', e => {
+      e.preventDefault();
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleLocalFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Controles de visualización técnica
+    document.getElementById('btn-wireframe').onclick = function() {
+      isWireframe = !isWireframe;
+      this.classList.toggle('active', isWireframe);
+      if (currentModel) {
+        currentModel.traverse(c => {
+          if (c.isMesh && c.material) {
+            const mats = Array.isArray(c.material) ? c.material : [c.material];
+            mats.forEach(m => { m.wireframe = isWireframe; });
+          }
+        });
+      }
+    };
+
+    document.getElementById('btn-skeleton').onclick = function() {
+      this.classList.toggle('active');
+      if (skeletonHelper) skeletonHelper.visible = this.classList.contains('active');
+    };
+
+    document.getElementById('btn-autorotate').onclick = function() {
+      controls.autoRotate = !controls.autoRotate;
+      this.classList.toggle('active', controls.autoRotate);
+    };
+
+    document.getElementById('btn-grid').onclick = function() {
+      gridHelper.visible = !gridHelper.visible;
+      this.classList.toggle('active', gridHelper.visible);
+    };
+
+    // Resize responsivo
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // Loop de renderizado
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      if (mixer) mixer.update(delta);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Iniciar cargando el primer modelo
+    loadModelByUrl(PORTFOLIO_MODELS[0].file, PORTFOLIO_MODELS[0].name);
+    animate();
+  </script>
 </body>
 </html>
